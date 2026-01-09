@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import uuid
 import re
@@ -5,7 +6,9 @@ from collections import Counter
 
 
 class Portfolio:
-    def __init__(self, file_path="app/resource/my_portfolio.csv"):
+    def __init__(self, file_path=None):
+        if file_path is None:
+            file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resource", "my_portfolio.csv")
         self.file_path = file_path
         self.data = pd.read_csv(file_path)
         self.portfolio_store = {}
