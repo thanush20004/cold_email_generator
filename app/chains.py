@@ -9,7 +9,7 @@ load_dotenv()
 
 class Chain:
     def __init__(self):
-        self.llm = ChatGroq(temperature=0, groq_api_key=os.getenv("GROQ_API_KEY"), model_name="llama-3.1-70b-versatile")
+        self.llm = ChatGroq(temperature=0, groq_api_key=os.getenv("GROQ_API_KEY"), model_name="llama-3.3-70b-versatile")
 
     def extract_jobs(self, cleaned_text):
         prompt_extract = PromptTemplate.from_template(
@@ -32,28 +32,54 @@ class Chain:
             raise OutputParserException("Context too big. Unable to parse jobs.")
         return res if isinstance(res, list) else [res]
 
-    def write_mail(self, job, links):
+    def write_mail(self, job, links, your_name="Your Name", your_email="your.email@example.com", recipient_name=""):
+        # Personalize the greeting based on recipient name
+        greeting = f"Dear {recipient_name}," if recipient_name else "Dear Hiring Manager,"
+        
         prompt_email = PromptTemplate.from_template(
             """
             ### JOB DESCRIPTION:
             {job_description}
 
             ### INSTRUCTION:
-            You are Mohan, a business development executive at AtliQ. AtliQ is an AI & Software Consulting company dedicated to facilitating
-            the seamless integration of business processes through automated tools. 
-            Over our experience, we have empowered numerous enterprises with tailored solutions, fostering scalability, 
-            process optimization, cost reduction, and heightened overall efficiency. 
-            Your job is to write a cold email to the client regarding the job mentioned above describing the capability of AtliQ 
-            in fulfilling their needs.
-            Also add the most relevant ones from the following links to showcase Atliq's portfolio: {link_list}
-            Remember you are Mohan, BDE at AtliQ. 
+            You are {your_name}, an individual job applicant. Write a personalized cold email applying for the position described above.
+            
+            Your task is to:
+            - Introduce yourself as an individual applicant
+            - Highlight your relevant skills and experience that match the job requirements
+            - Show enthusiasm for the role and company
+            - Explain why you're a good fit for this position
+            
+            {greeting}
+            
+            I am writing to express my interest in the position mentioned above. After reviewing the job description, I believe my skills and experience align well with your requirements.
+
+            Here are some of my relevant projects and work samples: {link_list}
+
+            I am confident that my background and skills make me a strong candidate for this role. I would welcome the opportunity to discuss how I can contribute to your team.
+
+            Please find my contact information below:
+            - Name: {your_name}
+            - Email: {your_email}
+            
+            I look forward to hearing from you.
+            
+            Best regards,
+            {your_name}
+            
             Do not provide a preamble.
             ### EMAIL (NO PREAMBLE):
 
             """
         )
         chain_email = prompt_email | self.llm
-        res = chain_email.invoke({"job_description": str(job), "link_list": links})
+        res = chain_email.invoke({
+            "job_description": str(job), 
+            "link_list": links,
+            "your_name": your_name,
+            "your_email": your_email,
+            "greeting": greeting
+        })
         return res.content
 
 if __name__ == "__main__":
