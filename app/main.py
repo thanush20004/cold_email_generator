@@ -1,7 +1,11 @@
 
+import os
 import streamlit as st
 from langchain_community.document_loaders import WebBaseLoader
 from urllib.parse import quote
+
+# Change to the project directory to ensure relative paths work
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 from chains import Chain
 from portfolio import Portfolio
@@ -308,17 +312,22 @@ def create_streamlit_app(llm, portfolio, clean_text):
                     st.markdown("---")
                     
                     for job in jobs:
-                        # Display job info
+                        # Display job info - dark theme styling
                         st.markdown(f"""
-                        <div style="background-color: #f0f2f6; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                            <h4 style="margin: 0; color: #1E90FF;">📋 {job.get('role', 'Unknown Role')}</h4>
-                            <p style="margin: 5px 0 0 0; color: #666;">💼 {job.get('experience', 'Experience not specified')}</p>
+                        <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                            <h4 style="margin: 0; color: #60a5fa;">📋 {job.get('role', 'Unknown Role')}</h4>
+                            <p style="margin: 5px 0 0 0; color: #94a3b8;">💼 {job.get('experience', 'Experience not specified')}</p>
                         </div>
                         """, unsafe_allow_html=True)
                         
                         skills = job.get('skills', [])
                         if skills:
-                            st.markdown("**Skills:** " + ", ".join(skills[:5]) + ("..." if len(skills) > 5 else ""))
+                            st.markdown(f"""
+                            <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 10px 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <span style="color: #60a5fa; font-weight: 600;">🛠️ Skills:</span>
+                                <span style="color: #cbd5e1; margin-left: 8px;">{", ".join(skills[:5])}{"..." if len(skills) > 5 else ""}</span>
+                            </div>
+                            """, unsafe_allow_html=True)
                         
                         links = portfolio.query_links(skills)
                         email = llm.write_mail(
@@ -330,7 +339,13 @@ def create_streamlit_app(llm, portfolio, clean_text):
                         )
                         
                         st.markdown("### 📧 Generated Email")
-                        st.code(email, language='markdown')
+                        
+                        # Display email in a styled container
+                        st.markdown(f'''
+                        <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255, 255, 255, 0.1); border-left: 4px solid #3b82f6; border-radius: 12px; padding: 20px; margin-bottom: 15px;">
+                            <pre style="white-space: pre-wrap; font-family: 'Inter', sans-serif; font-size: 0.9rem; color: #e2e8f0; margin: 0;">{email}</pre>
+                        </div>
+                        ''', unsafe_allow_html=True)
                         
                         # Add Gmail button
                         subject = quote(f"Job Application - {job.get('role', 'Position')}")
