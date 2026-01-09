@@ -285,8 +285,6 @@ def create_streamlit_app(llm, portfolio, clean_text):
     
     st.markdown('</div>', unsafe_allow_html=True)  # Close glass-card
     
-    st.markdown('<p class="footer-text">Made with ❤️ using Streamlit & LangChain</p>', unsafe_allow_html=True)
-    
     if submit_button:
         try:
             with st.spinner('🔍 Scraping job posting...'):
