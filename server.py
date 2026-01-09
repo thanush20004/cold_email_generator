@@ -4,9 +4,10 @@ from pydantic import BaseModel, HttpUrl
 from langchain_community.document_loaders import WebBaseLoader
 import uvicorn
 import os
+import sys
 
-# Change to the project directory
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.chains import Chain
 from app.portfolio import Portfolio
